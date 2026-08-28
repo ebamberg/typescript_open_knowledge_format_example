@@ -1,0 +1,30 @@
+{
+  "name": "typescript-okf",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc --noCheck",
+    "start": "tsx src/app.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@openrouter/sdk": "^1.2.71",
+    "gray-matter": "^4.0.3",
+    "tjs": "^7.0.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.23.12",
+    "typescript-json-schema": "^0.68.0"
+  },
+  "allowScripts": {
+    "@openrouter/sdk@1.2.71": true,
+    "esbuild@0.28.2": true
+  }
+}
