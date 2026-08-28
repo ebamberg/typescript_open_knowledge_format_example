@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="okfLogoTitle">
+  <title id="okfLogoTitle">typescript-okf logo: an open book resting on a database, linked by knowledge nodes</title>
+  <defs>
+    <linearGradient id="okf-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e293b"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="okf-cylinder" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#0e7490"/>
+    </linearGradient>
+  </defs>
+
+  <!-- badge background -->
+  <rect x="6" y="6" width="228" height="228" rx="46" fill="url(#okf-bg)"/>
+  <rect x="7.5" y="7.5" width="225" height="225" rx="44.5" fill="none" stroke="#5eead4" stroke-opacity="0.15" stroke-width="1.5"/>
+
+  <!-- database cylinder -->
+  <path d="M64,118 L64,172 A56,16 0 0 0 176,172 L176,118 A56,16 0 0 1 64,118 Z" fill="url(#okf-cylinder)"/>
+  <ellipse cx="120" cy="172" rx="56" ry="16" fill="#0b4f57"/>
+  <path d="M64,136 A56,16 0 0 0 176,136" fill="none" stroke="#0a4a52" stroke-width="2" opacity="0.55"/>
+  <path d="M64,154 A56,16 0 0 0 176,154" fill="none" stroke="#0a4a52" stroke-width="2" opacity="0.55"/>
+  <ellipse cx="120" cy="118" rx="56" ry="16" fill="none" stroke="#5eead4" stroke-opacity="0.4" stroke-width="1.5"/>
+
+  <!-- open book, doubling as the cylinder's top -->
+  <path d="M120,80 C98,82 72,84 60,90 L58,120 C74,118 98,120 120,122 Z" fill="#f8fafc" stroke="#0f766e" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M120,80 C142,82 168,84 180,90 L182,120 C166,118 142,120 120,122 Z" fill="#f8fafc" stroke="#0f766e" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M120,80 L120,122" stroke="#0f766e" stroke-width="2.25"/>
+  <path d="M112,116 L120,122 L128,116 L120,109 Z" fill="#0f766e" opacity="0.28"/>
+
+  <!-- page-stack ticks at the fore-edge, so it reads as many leaves, not one -->
+  <line x1="55" y1="97" x2="55" y2="113" stroke="#0f766e" stroke-width="1.2" opacity="0.4"/>
+  <line x1="52" y1="99" x2="52" y2="111" stroke="#0f766e" stroke-width="1.2" opacity="0.28"/>
+  <line x1="185" y1="97" x2="185" y2="113" stroke="#0f766e" stroke-width="1.2" opacity="0.4"/>
+  <line x1="188" y1="99" x2="188" y2="111" stroke="#0f766e" stroke-width="1.2" opacity="0.28"/>
+
+  <!-- text lines on each page -->
+  <line x1="72" y1="95" x2="107" y2="93.5" stroke="#0f766e" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+  <line x1="68" y1="104" x2="111" y2="103" stroke="#0f766e" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+  <line x1="70" y1="113" x2="109" y2="112.5" stroke="#0f766e" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+  <line x1="168" y1="95" x2="133" y2="93.5" stroke="#0f766e" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+  <line x1="172" y1="104" x2="129" y2="103" stroke="#0f766e" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+  <line x1="170" y1="113" x2="131" y2="112.5" stroke="#0f766e" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- open knowledge network crowning the book -->
+  <line x1="86" y1="86" x2="120" y2="62" stroke="#fbbf24" stroke-width="2"/>
+  <line x1="154" y1="86" x2="120" y2="62" stroke="#fbbf24" stroke-width="2"/>
+  <line x1="120" y1="62" x2="120" y2="80" stroke="#fbbf24" stroke-width="2"/>
+  <circle cx="86" cy="86" r="4" fill="#fde68a" stroke="#b45309" stroke-width="1"/>
+  <circle cx="154" cy="86" r="4" fill="#fde68a" stroke="#b45309" stroke-width="1"/>
+  <circle cx="120" cy="62" r="5" fill="#fbbf24" stroke="#b45309" stroke-width="1"/>
+</svg>

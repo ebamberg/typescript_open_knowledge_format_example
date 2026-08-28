@@ -7,8 +7,10 @@ import { read_knowledge } from './knowledgebases/okf';
 import { ChatMessages, ChatResult, ChatToolCall, ChatToolMessage } from '@openrouter/sdk/models';
 import { ToolDefinition } from './tools/tools';
 
-// const model = "openai/gpt-4o-mini";
-const model = "google/gemini-3-flash-preview";
+// const model = "openai/gpt-4o-mini"; // doesn't follows rules in the okf files+system prompt.
+// const model = "google/gemini-3-flash-preview"; // good but structured output fails often
+const model = "google/gemini-3.5-flash"
+// const model = "qwen/qwen3.8-27b"; // doesn't work at all
 const TEMPERATURE = 0.1;
 const MAX_TURNS=20;
 

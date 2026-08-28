@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="typescript-okf logo: an open book resting on a database, linked by knowledge nodes" width="160" />
+</p>
+
 # typescript-okf
 
 A small TypeScript agent that answers questions by reading a local **Open
