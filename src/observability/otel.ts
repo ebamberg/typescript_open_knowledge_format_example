@@ -46,3 +46,19 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
         throw error;
     }
 }
+
+export function withTrace<F extends (...args: any[])=> ReturnType<F>> (spanName: string, fn: F) : (...args: Parameters<F>) => ReturnType<F>  {
+    return (...args: Parameters<F>): ReturnType<F> => {
+          return root_tracer.startActiveSpan(spanName, (span)  => {
+            try {
+                return fn(...args);
+            } catch (error: any) {
+                span.recordException(error);
+                span.setStatus({ code: 2, message: error.message });
+                throw error;
+            } finally {
+                span.end();
+            }
+        });
+    }
+}
