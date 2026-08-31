@@ -1,14 +1,24 @@
 
 
- import { management_agent } from './agents';
+import { management_agent } from './agents';
+import { initOpenTelemetry, root_tracer } from './observability/otel';
 
- 
 
 function main() {
-    console.info("Knowledge database processing");
+  initOpenTelemetry("knowledgebasereader","0.0.1");
+  console.info("Knowledge database processing");
   //  const answer=management_agent("what is the capital of Germany");
-    const answer=management_agent("what is the capital of Germany and what are the capitols of the neighbor countries ");
-    console.log(answer);
+  root_tracer.startActiveSpan('main-execution', (span) => {
+    try {
+      const answer=management_agent("what is the capital of Germany and what are the capitols of the neighbor countries ");
+      console.log(answer);
+    } catch (error: any) {
+      span.recordException(error);
+      span.setStatus({ code: 2, message: error.message });
+    } finally {
+      span.end();
+    }
+  });
 
 }
 
