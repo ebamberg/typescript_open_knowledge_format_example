@@ -47,8 +47,8 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
     }
 }
 
-export function withTrace<F extends (...args: any[])=> ReturnType<F>> (spanName: string, fn: F) : (...args: Parameters<F>) => ReturnType<F>  {
-    return (...args: Parameters<F>): ReturnType<F> => {
+export function withTrace<F extends (...args: any[])=> any> (spanName: string, fn: F) : F  {
+    return ((...args: Parameters<F>) => {
           return root_tracer.startActiveSpan(spanName, (span)  => {
             try {
                 return fn(...args);
@@ -60,5 +60,5 @@ export function withTrace<F extends (...args: any[])=> ReturnType<F>> (spanName:
                 span.end();
             }
         });
-    }
+    });
 }
