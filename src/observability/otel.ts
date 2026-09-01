@@ -47,11 +47,21 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
     }
 }
 
-export function withTrace<F extends (...args: any[])=> any> (spanName: string, fn: F) : F  {
+function testTrace(a: string):string {
+    return a;
+}
+function wrap() {
+    const wrapped=withTrace("testTrace",testTrace);
+    const result=wrapped("Hello");
+    console.log(result);
+}
+
+export function withTrace<F extends (...args: any[])=> ReturnType<F>> (spanName: string, fn: F) {
     return ((...args: Parameters<F>) => {
-          return root_tracer.startActiveSpan(spanName, (span)  => {
+        return root_tracer.startActiveSpan(spanName, (span) => {
             try {
-                return fn(...args);
+                const result = fn(...args);
+                return result;
             } catch (error: any) {
                 span.recordException(error);
                 span.setStatus({ code: 2, message: error.message });
@@ -59,6 +69,8 @@ export function withTrace<F extends (...args: any[])=> any> (spanName: string, f
             } finally {
                 span.end();
             }
-        });
+        }) ;
     });
-}
+};
+
+
