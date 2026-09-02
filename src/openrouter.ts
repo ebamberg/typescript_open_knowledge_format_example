@@ -140,11 +140,11 @@ function execute_tool_call(available_tools: Array<ToolDefinition>, tool: ChatToo
             console.log(`tool args: ${args.knowledge_base} ${args.document_name} `);
             const result = tool_def.callback({ ...args });
             //         console.log(`EXECUTED TOOL_CALL: ${tool.function.name} args: ${args} returns: ${result}`);
-            return new ChatToolMessage({
+            return {
                 role: "tool",
                 content: JSON.stringify(result),
                 toolCallId: tool.id,
-            });
+            } as ChatToolMessage;
         } else {
             throw new ToolCallError("Error, there is not tool with the name: ${tool.function.name}");
         }

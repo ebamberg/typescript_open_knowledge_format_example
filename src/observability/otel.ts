@@ -2,7 +2,7 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import { trace, Tracer } from '@opentelemetry/api';
+import { SpanStatusCode, trace, Tracer } from '@opentelemetry/api';
 
 let openTelemetryClient: NodeSDK;
 export let root_tracer : Tracer;
@@ -61,10 +61,11 @@ export function withTrace<F extends (...args: any[])=> ReturnType<F>> (spanName:
         return root_tracer.startActiveSpan(spanName, (span) => {
             try {
                 const result = fn(...args);
+                span.setStatus({ code: SpanStatusCode.OK });
                 return result;
             } catch (error: any) {
                 span.recordException(error);
-                span.setStatus({ code: 2, message: error.message });
+                span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
                 throw error;
             } finally {
                 span.end();
