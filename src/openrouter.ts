@@ -6,7 +6,7 @@ import { resolve } from "path";
 import { read_knowledge } from './knowledgebases/okf';
 import { ChatMessages, ChatResult, ChatToolCall, ChatToolMessage } from '@openrouter/sdk/models';
 import { ToolDefinition } from './tools/tools';
-import { withTrace } from './observability/otel';
+import { withTrace, withTraceRequest } from './observability/otel';
 
 // const model = "openai/gpt-4o-mini"; // doesn't follows rules in the okf files+system prompt.
 // const model = "google/gemini-3-flash-preview"; // good but structured output fails often
@@ -19,6 +19,7 @@ const MAX_TURNS=20;
 export const client = new OpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY
 });
+const send_chat_request = withTrace("ChatRequest "+model, withTraceRequest(client.chat.send.bind(client.chat)));
 
 export class LLMError extends Error {
 }
@@ -61,7 +62,7 @@ export async function call_llm<Type>(systemprompt: string, prompt: string, outpu
 
     while (!interrupted && turns < MAX_TURNS) {
 
-        const response: SendChatCompletionRequestResponse = await client.chat.send({
+        const response: SendChatCompletionRequestResponse = await send_chat_request({
             chatRequest: {
                 model: model,
                 messages: messages,
