@@ -6,7 +6,8 @@ import { SpanStatusCode, trace, Tracer, metrics, Meter } from '@opentelemetry/ap
 import { SendChatCompletionRequestRequest, SendChatCompletionRequestResponse } from '@openrouter/sdk/models/operations/sendchatcompletionrequest.js';
 import { RequestOptions } from '@openrouter/sdk/lib/sdks.js';
 import { ChatResult } from '@openrouter/sdk/models';
-import { ConsoleMetricExporter, MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
+import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 
 let openTelemetryClient: NodeSDK;
 export let root_tracer: Tracer;
@@ -38,8 +39,12 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
         traceExporter: traceExporter,
     });
 
+    const metricExporter = new OTLPMetricExporter({
+        url: 'http://localhost:4317', // same OTLP gRPC endpoint the collector exposes for traces
+    });
+
     const metricReader = new PeriodicExportingMetricReader({
-        exporter: new ConsoleMetricExporter(),
+        exporter: metricExporter,
         // Default is 60000ms (60 seconds). Set to 10 seconds for demonstrative purposes only.
         exportIntervalMillis: 10000,
         });
