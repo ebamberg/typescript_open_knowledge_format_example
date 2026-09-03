@@ -72,6 +72,7 @@ export function withTraceRequest<F extends (request: SendChatCompletionRequestRe
         stream?: false | undefined;
     };
     }, options?: RequestOptions) => ReturnType<F>>(fn: F) {
+
     return ( (request: SendChatCompletionRequestRequest & {
         chatRequest: {
             stream?: false | undefined;
@@ -79,6 +80,13 @@ export function withTraceRequest<F extends (request: SendChatCompletionRequestRe
     }, options?: RequestOptions) =>  {
 
         const currentSpan = trace.getActiveSpan();
+
+        const requestCounter = root_meter.createCounter("gen_ai.request.count");
+        const inputTokenCounter = root_meter.createCounter("gen_ai.request.input_tokens.count");
+        const outputTokenCounter = root_meter.createCounter("gen_ai.response.output_tokens.count");
+        const totalTokenCounter = root_meter.createCounter("gen_ai.response.total_tokens.count");
+        const cacheTokenCounter = root_meter.createCounter("gen_ai.cache.token.count");
+        const priceCounter = root_meter.createCounter("gen_ai.response.price.count");
 
         if (currentSpan) {
             request.chatRequest.model && currentSpan.setAttribute("gen_ai.request.model", request.chatRequest.model);
@@ -88,6 +96,9 @@ export function withTraceRequest<F extends (request: SendChatCompletionRequestRe
             request.chatRequest.topP && currentSpan.setAttribute("gen_ai.request.top_p", request.chatRequest.topP);
         }
         
+        requestCounter.add(1, {
+            "gen_ai.request.model": request.chatRequest.model ?? "unknown",
+        });
         const response = fn(request, options);
 
         if (currentSpan) {
@@ -96,6 +107,24 @@ export function withTraceRequest<F extends (request: SendChatCompletionRequestRe
                 currentSpan.setAttribute("gen_ai.response.model", resp.model);
                 currentSpan.setAttribute("gen_ai.response.finish_reason", resp.choices[0].finishReason ?? "unknown");
                 currentSpan.setAttribute("gen_ai.response.usage", JSON.stringify(resp.usage ?? {}));
+                totalTokenCounter.add(resp.usage?.totalTokens ?? 0, {
+                    "gen_ai.request.model": request.chatRequest.model ?? "unknown",
+                });
+                inputTokenCounter.add(resp.usage?.promptTokens ?? 0, {
+                    "gen_ai.request.model": request.chatRequest.model ?? "unknown",
+                });
+                outputTokenCounter.add(resp.usage?.completionTokens ?? 0, {
+                    "gen_ai.request.model": request.chatRequest.model ?? "unknown",
+                });
+                totalTokenCounter.add(resp.usage?.totalTokens ?? 0, {
+                    "gen_ai.request.model": request.chatRequest.model ?? "unknown",
+                }); 
+                cacheTokenCounter.add(resp.usage?.promptTokensDetails?.cachedTokens ?? 0, {
+                    "gen_ai.request.model": request.chatRequest.model ?? "unknown",
+                });
+                priceCounter.add(resp.usage?.cost ?? 0, {
+                    "gen_ai.request.model": request.chatRequest.model ?? "unknown",
+                });
             };
             if (response instanceof Promise) {
                 response.then((res) => {
