@@ -2,13 +2,15 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import { SpanStatusCode, trace, Tracer } from '@opentelemetry/api';
+import { SpanStatusCode, trace, Tracer, metrics, Meter } from '@opentelemetry/api';
 import { SendChatCompletionRequestRequest, SendChatCompletionRequestResponse } from '@openrouter/sdk/models/operations/sendchatcompletionrequest.js';
 import { RequestOptions } from '@openrouter/sdk/lib/sdks.js';
 import { ChatResult } from '@openrouter/sdk/models';
+import { ConsoleMetricExporter, MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 
 let openTelemetryClient: NodeSDK;
-export let root_tracer : Tracer;
+export let root_tracer: Tracer;
+export let root_meter: Meter;
 
 // Critical for standalone apps: flush buffers before the process ends
 const shutdown = () => {
@@ -36,6 +38,20 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
         traceExporter: traceExporter,
     });
 
+    const metricReader = new PeriodicExportingMetricReader({
+        exporter: new ConsoleMetricExporter(),
+        // Default is 60000ms (60 seconds). Set to 10 seconds for demonstrative purposes only.
+        exportIntervalMillis: 10000,
+        });
+
+    const globalServiceMeterProvider = new MeterProvider({
+        resource: resource,
+        readers: [metricReader],
+    });
+
+    // Set this MeterProvider to be global to the app being instrumented.
+    metrics.setGlobalMeterProvider(globalServiceMeterProvider);
+
     try {
         openTelemetryClient.start();
         console.log('OpenTelemetry initialized successfully.');
@@ -43,20 +59,12 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
         process.on('SIGTERM', shutdown);
         process.on('SIGINT', shutdown);
 
-        root_tracer = trace.getTracer('read_from_knowledge_base');
+        root_tracer = trace.getTracer(appName, appVersion);
+        root_meter = metrics.getMeter(appName, appVersion);
     } catch (error) {
         console.error('Failed to initialize OpenTelemetry', error);
         throw error;
     }
-}
-
-function testTrace(a: string):string {
-    return a;
-}
-function wrap() {
-    const wrapped=withTrace("testTrace",testTrace);
-    const result=wrapped("Hello");
-    console.log(result);
 }
 
 export function withTraceRequest<F extends (request: SendChatCompletionRequestRequest & {
@@ -84,6 +92,8 @@ export function withTraceRequest<F extends (request: SendChatCompletionRequestRe
 
         if (currentSpan) {
             const reportReponse = (resp: ChatResult) => {
+                currentSpan.setAttribute("gen_ai.response.id", resp.id);
+                currentSpan.setAttribute("gen_ai.response.model", resp.model);
                 currentSpan.setAttribute("gen_ai.response.finish_reason", resp.choices[0].finishReason ?? "unknown");
                 currentSpan.setAttribute("gen_ai.response.usage", JSON.stringify(resp.usage ?? {}));
             };
@@ -100,21 +110,41 @@ export function withTraceRequest<F extends (request: SendChatCompletionRequestRe
     });
 }
 
-export function withTrace<F extends (...args: any[])=> ReturnType<F>> (spanName: string, fn: F) {
+export function withTrace<F extends (...args: any[]) => any>(spanName: string, fn: F) {
     return ((...args: Parameters<F>) => {
         return root_tracer.startActiveSpan(spanName, (span) => {
+            let result: any;
             try {
-                const result = fn(...args);
-                span.setStatus({ code: SpanStatusCode.OK });
-                return result;
+                result = fn(...args);
             } catch (error: any) {
                 span.recordException(error);
                 span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-                throw error;
-            } finally {
                 span.end();
+                throw error;
             }
-        }) ;
+
+            if (result instanceof Promise) {
+                // async: don't end the span until the promise settles
+                return result
+                    .then((res) => {
+                        span.setStatus({ code: SpanStatusCode.OK });
+                        return res;
+                    })
+                    .catch((error) => {
+                        span.recordException(error);
+                        span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+                        throw error;
+                    })
+                    .finally(() => {
+                        span.end();
+                    });
+            } else {
+                // sync: end the span immediately
+                span.setStatus({ code: SpanStatusCode.OK });
+                span.end();
+                return result;
+            }
+        });
     });
 };
 
