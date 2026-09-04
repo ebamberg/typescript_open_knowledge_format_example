@@ -29,3 +29,5 @@ Thumbs.db
 
 # Coverage / testing
 coverage/
+# temporary data like traces
+tmp/
