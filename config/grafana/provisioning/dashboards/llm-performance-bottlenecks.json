@@ -123,7 +123,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               }
             ]
@@ -154,7 +154,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "100 * sum(rate(traces_span_metrics_calls_total{status_code=\"STATUS_CODE_ERROR\"}[$__rate_interval])) / sum(rate(traces_span_metrics_calls_total[$__rate_interval]))",
+          "expr": "100 * sum(rate(traces_span_metrics_calls_total{status_code=\"STATUS_CODE_ERROR\"}[$__range])) / sum(rate(traces_span_metrics_calls_total[$__range]))",
           "refId": "A",
           "legendFormat": "",
           "range": false,
@@ -184,15 +184,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#fab219",
                 "value": 1
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 5
               }
             ]
@@ -223,7 +223,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(traces_span_metrics_duration_seconds_bucket{span_name=\"management_agent\"}[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(traces_span_metrics_duration_seconds_bucket{span_name=\"management_agent\"}[$__range])) by (le))",
           "refId": "A",
           "legendFormat": "",
           "range": false,
@@ -253,15 +253,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#fab219",
                 "value": 5
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 15
               }
             ]
@@ -292,7 +292,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(gen_ai_response_cost_usd_bucket[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(gen_ai_response_cost_usd_bucket[$__range])) by (le))",
           "refId": "A",
           "legendFormat": "",
           "range": false,
@@ -322,15 +322,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#fab219",
                 "value": 0.01
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 0.05
               }
             ]
@@ -438,7 +438,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               }
             ]
@@ -481,7 +481,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, histogram_quantile(0.99, sum(rate(traces_span_metrics_duration_seconds_bucket[$__rate_interval])) by (le, span_name)))",
+          "expr": "topk(10, histogram_quantile(0.99, sum(rate(traces_span_metrics_duration_seconds_bucket[$__range])) by (le, span_name)))",
           "refId": "A",
           "legendFormat": "{{span_name}}",
           "range": false,
@@ -510,15 +510,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#fab219",
                 "value": 3
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 10
               }
             ]
@@ -562,7 +562,7 @@
         },
         "color": {
           "mode": "scheme",
-          "scheme": "Spectral",
+          "scheme": "Blues",
           "steps": 64,
           "reverse": false,
           "exponent": 0.5
@@ -756,7 +756,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               }
             ]
@@ -799,15 +799,15 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, sum(increase(gen_ai_request_errors_count_total[$__range])) by (error_type, gen_ai_request_model))",
+          "expr": "topk(10, sum(gen_ai_request_errors_count_total) by (error_type, gen_ai_request_model))",
           "refId": "A",
           "legendFormat": "",
           "range": false,
           "instant": true,
-          "format": "time_series"
+          "format": "table"
         }
       ],
-      "description": "",
+      "description": "Cumulative error counts since the app process started, broken down by type and model - a direct counter read rather than a rate, since sparse/rare events like errors often lack the sample history rate()/increase() needs.",
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
@@ -828,5 +828,6 @@
         "overrides": []
       }
     }
-  ]
+  ],
+  "style": "dark"
 }

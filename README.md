@@ -82,6 +82,66 @@ To type-check and transpile to `dist/`:
 npm run build
 ```
 
+## Observability
+
+The app exports OpenTelemetry traces and metrics for every LLM call and tool
+call (see [src/observability/otel.ts](src/observability/otel.ts)), backed by
+a local Grafana + Prometheus + Tempo stack defined in
+[docker-compose.yaml](docker-compose.yaml).
+
+### Starting the stack
+
+```bash
+docker compose up -d
+```
+
+This starts four services on the `monitoring` docker network:
+
+| Service | URL | Purpose |
+|---|---|---|
+| Grafana | http://localhost:3000 | Dashboards (anonymous access, no login needed) |
+| Prometheus | http://localhost:9090 | Metrics storage, scrapes the collector every 10s |
+| Tempo | http://localhost:3200 | Trace storage |
+| OTel Collector | `localhost:4317` (gRPC) | Where the app sends traces/metrics; fans them out to Tempo and Prometheus, and derives RED metrics from spans via a `span_metrics` connector |
+
+Run the app (`npm run start`) with the stack up and it starts reporting
+automatically — [src/observability/otel.ts](src/observability/otel.ts) points
+the OTLP exporters at `localhost:4317`.
+
+Stop everything with `docker compose down`. No volumes are configured, so
+this also wipes all collected metrics/traces — intentional for a local dev
+setup; add volume mounts to `prometheus`/`tempo` in `docker-compose.yaml` if
+you want history to survive a restart.
+
+### Dashboards
+
+Two dashboards are auto-provisioned into a **LLM Observability** folder in
+Grafana on startup (see
+[config/grafana/provisioning/dashboards/](config/grafana/provisioning/dashboards/))
+— no manual import needed.
+
+**LLM Performance & Bottlenecks (RED)** — request rate, error rate, and
+p50/p90/p95/p99 latency for every stage of the agent pipeline (agent
+orchestration, each LLM call, each tool call), so you can see which stage is
+actually the bottleneck rather than only the end-to-end time. Includes a
+ranked "slowest stage right now" view, a latency heatmap, and two tables
+pulled straight from Tempo that red-flag individual traces: ones that ran
+longer than 10s, and ones that failed.
+
+![LLM Performance & Bottlenecks dashboard](assets/dashboard-performance-bottlenecks.png)
+
+**LLM Cost & Token Analytics** — total spend, cost-per-request percentiles,
+cache hit ratio, and token throughput (input/output/cached), broken down by
+model. Includes a cost-per-request heatmap and a table of individual traces
+that crossed a $0.05 cost-trap threshold, again linking straight to the full
+trace in Tempo.
+
+![LLM Cost & Token Analytics dashboard](assets/dashboard-cost-tokens.png)
+
+Both dashboards start empty on a cold `docker compose up` — every panel shows
+"No data" until real traffic flows through `send_chat_request` (the
+screenshots above were taken with a few sample requests seeded in).
+
 
 
 ## Project structure

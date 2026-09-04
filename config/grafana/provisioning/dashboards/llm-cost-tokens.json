@@ -123,7 +123,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               }
             ]
@@ -184,7 +184,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               }
             ]
@@ -245,7 +245,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               }
             ]
@@ -306,15 +306,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#fab219",
                 "value": 10
               },
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": 30
               }
             ]
@@ -422,15 +422,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#fab219",
                 "value": 0.01
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 0.05
               }
             ]
@@ -456,7 +456,7 @@
     {
       "id": 8,
       "type": "bargauge",
-      "title": "Total Spend by Model",
+      "title": "Spend by Model",
       "gridPos": {
         "h": 9,
         "w": 6,
@@ -502,19 +502,65 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "google/gemini-3.5-flash"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "openai/gpt-4o-mini"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "qwen/qwen3.8-27b"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          }
+        ]
       }
     },
     {
       "id": 9,
       "type": "bargauge",
-      "title": "p95 Cost/Request by Model",
+      "title": "p95 Cost / Req by Model",
       "gridPos": {
         "h": 9,
         "w": 6,
@@ -531,7 +577,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, histogram_quantile(0.95, sum by (le, gen_ai_request_model) (rate(gen_ai_response_cost_usd_bucket[$__rate_interval]))))",
+          "expr": "topk(10, histogram_quantile(0.95, sum by (le, gen_ai_request_model) (rate(gen_ai_response_cost_usd_bucket[$__range]))))",
           "refId": "A",
           "legendFormat": "{{gen_ai_request_model}}",
           "range": false,
@@ -560,21 +606,67 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#fab219",
                 "value": 0.01
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 0.05
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "google/gemini-3.5-flash"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "openai/gpt-4o-mini"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "qwen/qwen3.8-27b"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -638,13 +730,59 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "google/gemini-3.5-flash"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "openai/gpt-4o-mini"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "qwen/qwen3.8-27b"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
@@ -696,7 +834,7 @@
         },
         "color": {
           "mode": "scheme",
-          "scheme": "Spectral",
+          "scheme": "Blues",
           "steps": 64,
           "reverse": false,
           "exponent": 0.5
@@ -866,13 +1004,59 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "input"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "output"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cached"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
@@ -924,7 +1108,7 @@
         },
         "color": {
           "mode": "scheme",
-          "scheme": "Spectral",
+          "scheme": "Blues",
           "steps": 64,
           "reverse": false,
           "exponent": 0.5
@@ -962,12 +1146,12 @@
       "collapsed": false
     },
     {
-      "id": 19,
-      "type": "table",
-      "title": "Requests, Spend & Errors by Model",
+      "id": 20,
+      "type": "bargauge",
+      "title": "Requests by Model",
       "gridPos": {
         "h": 8,
-        "w": 24,
+        "w": 8,
         "x": 0,
         "y": 44
       },
@@ -982,82 +1166,300 @@
             "uid": "prometheus"
           },
           "expr": "sum by (gen_ai_request_model) (increase(gen_ai_request_count_total[$__range]))",
-          "refId": "Requests",
-          "legendFormat": "",
-          "range": false,
-          "instant": true,
-          "format": "time_series"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "sum by (gen_ai_request_model) (increase(gen_ai_response_price_count_total[$__range]))",
-          "refId": "Total Cost ($)",
-          "legendFormat": "",
-          "range": false,
-          "instant": true,
-          "format": "time_series"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "sum by (gen_ai_request_model) (increase(gen_ai_response_total_tokens_count_total[$__range]))",
-          "refId": "Total Tokens",
-          "legendFormat": "",
-          "range": false,
-          "instant": true,
-          "format": "time_series"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "sum by (gen_ai_request_model) (increase(gen_ai_request_errors_count_total[$__range]))",
-          "refId": "Errors",
-          "legendFormat": "",
+          "refId": "A",
+          "legendFormat": "{{gen_ai_request_model}}",
           "range": false,
           "instant": true,
           "format": "time_series"
         }
       ],
-      "description": "One row per model - use this to decide which model is worth its cost for the complexity of requests you're sending it.",
+      "description": "",
       "options": {
-        "showHeader": true,
-        "cellHeight": "sm",
-        "footer": {
-          "show": false
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "sortBy": []
+        "showUnfilled": true
       },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            }
-          }
+          "unit": "short",
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0ca30c",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "gen_ai_request_model"
+              "options": "google/gemini-3.5-flash"
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Model"
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "openai/gpt-4o-mini"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "qwen/qwen3.8-27b"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 21,
+      "type": "bargauge",
+      "title": "Total Tokens by Model",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 44
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (gen_ai_request_model) (increase(gen_ai_response_tokens_count_total[$__range]))",
+          "refId": "A",
+          "legendFormat": "{{gen_ai_request_model}}",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        }
+      ],
+      "description": "",
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0ca30c",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "google/gemini-3.5-flash"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "openai/gpt-4o-mini"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "qwen/qwen3.8-27b"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 22,
+      "type": "bargauge",
+      "title": "Errors by Model",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 44
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (gen_ai_request_model) (gen_ai_request_errors_count_total)",
+          "refId": "A",
+          "legendFormat": "{{gen_ai_request_model}}",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        }
+      ],
+      "description": "",
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0ca30c",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "google/gemini-3.5-flash"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "openai/gpt-4o-mini"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "qwen/qwen3.8-27b"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
               }
             ]
           }
         ]
       }
     }
-  ]
+  ],
+  "style": "dark"
 }
