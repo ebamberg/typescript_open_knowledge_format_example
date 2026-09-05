@@ -87,17 +87,31 @@ export OPENROUTER_API_KEY="sk-or-..."
 
 ### 2. Knowledge base location
 
-Knowledge bases live in [data/knowledge_bases/](data/knowledge_bases/), a
-path set in [src/knowledgebases/okf.ts](src/knowledgebases/okf.ts):
+Knowledge bases live in [data/knowledge_bases/](data/knowledge_bases/) by
+default, read from the `KNOWLEDGE_DATABASES` environment variable in
+[src/knowledgebases/okf.ts](src/knowledgebases/okf.ts):
 
 ```ts
-const KNOWLEDGE_DATABASES = "data/knowledge_bases";
+const KNOWLEDGE_DATABASES = process.env.KNOWLEDGE_DATABASES ?? "data/knowledge_bases";
 ```
 
 Each subfolder under this path is treated as one knowledge base and must
 contain an `index.md` file (with optional YAML frontmatter) describing its
 contents and how to navigate it. Add more knowledge bases by dropping
-another such folder in here, or point `KNOWLEDGE_DATABASES` elsewhere.
+another such folder in here, or point elsewhere by setting the environment
+variable:
+
+PowerShell:
+
+```powershell
+$env:KNOWLEDGE_DATABASES = "C:\path\to\knowledge_bases"
+```
+
+bash:
+
+```bash
+export KNOWLEDGE_DATABASES="/path/to/knowledge_bases"
+```
 
 Bundled knowledge base:
 
