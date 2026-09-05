@@ -3,11 +3,11 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import { SpanStatusCode, trace, Tracer, metrics, Meter } from '@opentelemetry/api';
-import { SendChatCompletionRequestRequest, SendChatCompletionRequestResponse } from '@openrouter/sdk/models/operations/sendchatcompletionrequest.js';
 import { RequestOptions } from '@openrouter/sdk/lib/sdks.js';
 import { ChatResult } from '@openrouter/sdk/models';
 import { MeterProvider, PeriodicExportingMetricReader, AggregationType } from '@opentelemetry/sdk-metrics';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
+import { ChatCompletionFn, NonStreamingChatCompletionRequest } from '../harness/types.js';
 
 // Bucket boundaries tuned for LLM traffic (default OTel buckets are tuned for web request
 // latencies in ms, not multi-second LLM calls or fractional-cent costs) so that
@@ -38,7 +38,7 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
     });
 
     const traceExporter = new OTLPTraceExporter({
-        url: 'http://localhost:4317', // Port 4317 is the OTLP gRPC port from your docker setup
+        url: 'http://localhost:4317', // Port 4317 is the OTLP gRPC port from the docker setup
     });
 
     openTelemetryClient = new NodeSDK({
@@ -52,7 +52,7 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
 
     const metricReader = new PeriodicExportingMetricReader({
         exporter: metricExporter,
-        // Default is 60000ms (60 seconds). Set to 10 seconds for demonstrative purposes only.
+        // Default is 60000ms (60 seconds). 10 sec just for testing, but in production you might want to increase this to reduce load on the collector.
         exportIntervalMillis: 10000,
         });
 
@@ -102,17 +102,9 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
     }
 }
 
-export function withTraceRequest<F extends (request: SendChatCompletionRequestRequest & {
-    chatRequest: {
-        stream?: false | undefined;
-    };
-    }, options?: RequestOptions) => ReturnType<F>>(fn: F) {
+export function withTraceRequest<F extends ChatCompletionFn<F>>(fn: F) {
 
-    return ( (request: SendChatCompletionRequestRequest & {
-        chatRequest: {
-            stream?: false | undefined;
-        };
-    }, options?: RequestOptions) =>  {
+    return ( (request: NonStreamingChatCompletionRequest, options?: RequestOptions) =>  {
 
         const currentSpan = trace.getActiveSpan();
         const model = request.chatRequest.model ?? "unknown";

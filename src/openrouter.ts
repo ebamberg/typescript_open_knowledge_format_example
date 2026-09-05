@@ -7,6 +7,7 @@ import { read_knowledge } from './knowledgebases/okf';
 import { ChatMessages, ChatResult, ChatToolCall, ChatToolMessage } from '@openrouter/sdk/models';
 import { ToolDefinition } from './tools/tools';
 import { withTrace, withTraceRequest } from './observability/otel';
+import { withRetryOnError } from './harness/harness';
 
 // const model = "openai/gpt-4o-mini"; // doesn't follows rules in the okf files+system prompt.
 // const model = "google/gemini-3-flash-preview"; // good but structured output fails often
@@ -19,7 +20,11 @@ const MAX_TURNS=20;
 export const client = new OpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY
 });
-const send_chat_request = withTrace("ChatRequest "+model, withTraceRequest(client.chat.send.bind(client.chat)));
+const send_chat_request = withTrace("ChatRequest "+model, 
+                                withRetryOnError(
+                                    withTraceRequest(client.chat.send.bind(client.chat))
+                                )
+                            );
 
 export class LLMError extends Error {
 }
