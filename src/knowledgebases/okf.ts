@@ -3,7 +3,7 @@
  import {join} from 'path';
 
 
-const KNOWLEDGE_DATABASES="data/knowledge_bases";
+const KNOWLEDGE_DATABASES = process.env.KNOWLEDGE_DATABASES ?? "data/knowledge_bases";
 
 export interface KnowledgeBase {
     name: string,
