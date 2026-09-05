@@ -1,6 +1,7 @@
 import { RequestOptions } from '@openrouter/sdk/lib/sdks.js';
 import { ChatCompletionFn, NonStreamingChatCompletionRequest } from './types.js';
 import { SpanStatusCode, trace, Tracer, metrics, Meter } from '@opentelemetry/api';
+import { root_meter } from '../observability/otel.js';
 
 const MAX_RETRIES = 3;
 const INITIAL_BACKOFF_MS = 250;
@@ -12,16 +13,30 @@ export function withRetryOnError<F extends ChatCompletionFn<F>>(fn: F, maxRetrie
 
     return ( (request: NonStreamingChatCompletionRequest, options?: RequestOptions) => {
 
+        const model = request.chatRequest.model ?? "unknown";
+
+        // Counters for stability monitoring: how often a call needs to be retried, and how
+        // often it still fails after every retry has been exhausted (a give-up).
+        const retryCounter = root_meter.createCounter("gen_ai.request.retries.count", {
+            description: "Number of retry attempts made after a failed chat completion call",
+        });
+        const retryExhaustedCounter = root_meter.createCounter("gen_ai.request.retries_exhausted.count", {
+            description: "Number of requests that still failed after exhausting all retries",
+        });
+
         const attemptCall = (attempt: number, backoffMs: number): ReturnType<F> => {
             trace.getActiveSpan()?.setAttribute("retry.attempt", attempt);
 
             // the inner handle Error method
             const handleError = (error: unknown) => {
+                const errorType = (error as Error)?.name ?? "unknown";
                 if (attempt === MAX_RETRIES) {
+                    retryExhaustedCounter.add(1, { "gen_ai.request.model": model, "error.type": errorType });
                     console.error(`Retry failed after ${MAX_RETRIES} retries, giving up.`, error);
                     trace.getActiveSpan()?.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
                     throw error;
                 }
+                retryCounter.add(1, { "gen_ai.request.model": model, "error.type": errorType, "retry.attempt": attempt });
                 trace.getActiveSpan()?.addEvent("retry.error", { "error.message": (error as Error).message, "retry.attempt": attempt });
                 console.warn(`Error encountered, retrying in ${backoffMs}ms... (attempt ${attempt + 1}/${MAX_RETRIES})`, error);
             };

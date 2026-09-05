@@ -32,6 +32,19 @@
       "includeVars": true,
       "keepTime": true,
       "targetBlank": false
+    },
+    {
+      "title": "LLM Stability & Retries",
+      "type": "dashboards",
+      "tags": [
+        "llm",
+        "stability"
+      ],
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
     }
   ],
   "templating": {
