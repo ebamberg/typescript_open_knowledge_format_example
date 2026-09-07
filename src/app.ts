@@ -2,15 +2,18 @@
 
 import { management_agent } from './agents';
 import { initOpenTelemetry, withTrace } from './observability/otel';
+import { log } from './logger';
 
 
-function main() {
+async function main() {
+
   initOpenTelemetry("knowledgebasereader","0.0.1");
-  console.info("Knowledge database processing");
-  //  const answer=management_agent("what is the capital of Germany");
+  log.info("App", "starting knowledge base agent...");
   const agent= withTrace("management_agent", management_agent);
-  const answer=agent("what is the capital of Germany and what are the capitols of the neighbor countries ");
-  console.log(answer);
+
+  const answer = await agent("I want to lease a floor in one of your buildings, what are the available options and what are the prices?");
+  log.success("App", "answer:");
+  log.json(answer);
 }
 
 main()

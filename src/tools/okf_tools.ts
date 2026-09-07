@@ -21,7 +21,7 @@ export const read_okf_tool: ToolDefinition = {
     },
   },
   callback: (knowledge_base: string, document_name: string ) : string | ChatContentItems[] => {
-      return JSON.stringify( read_knowledge(knowledge_base, document_name));
+      return JSON.stringify( read_knowledge(  knowledge_base, document_name  ));
       
   }
 }

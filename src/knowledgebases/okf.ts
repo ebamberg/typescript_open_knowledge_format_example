@@ -1,9 +1,12 @@
  import {readdirSync, statSync, readFileSync} from 'fs';
  import matter from 'gray-matter';
  import {join} from 'path';
+ import { log } from '../logger';
 
 
-const KNOWLEDGE_DATABASES = process.env.KNOWLEDGE_DATABASES ?? "data/knowledge_bases";
+function knowledgeDatabasesPath(): string {
+    return process.env.KNOWLEDGE_DATABASES ?? "data/knowledge_bases/geographics";
+}
 
 export interface KnowledgeBase {
     name: string,
@@ -14,6 +17,7 @@ export interface KnowledgeBase {
 
 export function listKnowledgeBases(): KnowledgeBase[] {
     const knowledgeBases: KnowledgeBase[] = [];
+    const KNOWLEDGE_DATABASES = knowledgeDatabasesPath();
     const items = readdirSync(KNOWLEDGE_DATABASES);
 
     for (const item of items) {
@@ -38,14 +42,15 @@ export function read_knowledge( {knowledge_base, document_name} : { knowledge_ba
         document_name=document_name+".md";
     }
     // Read the Markdown file
-    const knowledgefile = join(KNOWLEDGE_DATABASES,knowledge_base,document_name)
+    const knowledgefile = join(knowledgeDatabasesPath(),knowledge_base,document_name)
+    log.info("KB", `reading document: ${knowledgefile}`);
     const fileContent = readFileSync(knowledgefile, 'utf-8');
 
     // Parse the file content
     const { data, content } = matter(fileContent);
 
-    console.log('YAML Metadata:', data);
-    console.log('Markdown Content:', content);
+//    console.log('YAML Metadata:', data);
+//    console.log('Markdown Content:', content);
     return { name: document_name, path:knowledgefile , metadata: data, content: content };
 
 }

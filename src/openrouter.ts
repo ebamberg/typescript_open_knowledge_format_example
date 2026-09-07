@@ -8,6 +8,7 @@ import { ChatMessages, ChatResult, ChatToolCall, ChatToolMessage } from '@openro
 import { ToolDefinition } from './tools/tools';
 import { withTrace, withTraceRequest } from './observability/otel';
 import { withRetryOnError } from './harness/harness';
+import { log } from './logger';
 
 // const model = "openai/gpt-4o-mini"; // doesn't follows rules in the okf files+system prompt.
 // const model = "google/gemini-3-flash-preview"; // good but structured output fails often
@@ -84,8 +85,6 @@ export async function call_llm<Type>(systemprompt: string, prompt: string, outpu
                 toolChoice: "auto", // Automatically choose a tool
             },
         });
-        console.log("response:", response);
-        console.log("deciding on action....");
         if (!("choices" in response)) {
             throw new LLMError("Expected a non-streaming chat completion response");
         }
@@ -93,7 +92,7 @@ export async function call_llm<Type>(systemprompt: string, prompt: string, outpu
 
         messages.push(response_message);
         const finishReason = response.choices[0].finishReason;
-        console.log(`finish reason ${finishReason}`);
+        log.step("LLM", `response received — finish_reason: "${finishReason}"`);
         if (finishReason == "tool_calls") {
             const tool_calls = response_message.toolCalls;
             if (tool_calls) {
@@ -104,7 +103,7 @@ export async function call_llm<Type>(systemprompt: string, prompt: string, outpu
                         const tool_response = tool_executor(tools, tool);
                         messages.push(tool_response);
                     } catch (error) {
-                        console.log(`error while calling tool: ${error}`);
+                        log.error("LLM", `tool call "${tool.function.name}" failed:`, error);
                         messages.push({
                             role: "tool",
                             content: `Error while trying to call tool: ${error instanceof Error ? error.message : String(error)}`,
@@ -119,10 +118,11 @@ export async function call_llm<Type>(systemprompt: string, prompt: string, outpu
                 throw new LLMError("Expected the LLM response content to be a JSON string");
             }
             const parsedResponse = JSON.parse(response_message.content);
-            console.log("parsedResponse:", parsedResponse);
+            log.success("LLM", "final answer:");
+            log.json(parsedResponse);
             return parsedResponse;
         } else {
-            throw new LLMError("unhandled finishReason:" + finishReason)
+            throw new LLMError(`unhandled finishReason: ${finishReason}`)
         }
     }
     if (turns >= MAX_TURNS) {
@@ -135,27 +135,22 @@ export async function call_llm<Type>(systemprompt: string, prompt: string, outpu
 }
 
 function execute_tool_call(available_tools: Array<ToolDefinition>, tool: ChatToolCall): ChatToolMessage {
-    console.log("executing tool call")
-
     if (tool.type == "function") {
-        console.log(tool.function);
         const tool_def = available_tools.find(t => tool.function.name == t.name);
-        console.log(`tool definition: ${tool_def}`);
         if (tool_def) {
             const args = JSON.parse(tool.function.arguments);
-            console.log(`tool args: ${args.knowledge_base} ${args.document_name} `);
+            log.step("Tool", `executing "${tool.function.name}" with args: ${JSON.stringify(args)}`);
             const result = tool_def.callback({ ...args });
-            //         console.log(`EXECUTED TOOL_CALL: ${tool.function.name} args: ${args} returns: ${result}`);
             return {
                 role: "tool",
                 content: JSON.stringify(result),
                 toolCallId: tool.id,
             } as ChatToolMessage;
         } else {
-            throw new ToolCallError("Error, there is not tool with the name: ${tool.function.name}");
+            throw new ToolCallError(`Error, there is no tool with the name: ${tool.function.name}`);
         }
     } else {
-        throw new LLMError("tool type ${tool.type} not supported");
+        throw new LLMError(`tool type ${tool.type} not supported`);
     }
 }
 

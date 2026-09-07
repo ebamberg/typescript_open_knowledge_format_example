@@ -46,11 +46,13 @@ way a person would browse a wiki, until it has enough information to answer.
 ## Table of Contents
 
 - [Getting Started](#getting-started)
+- [Examples](#examples)
 - [Configuration](#configuration)
 - [Running](#running)
 - [Building](#building)
 - [Observability](#observability)
 - [Architecture](#architecture)
+- [Appendix: Knowledge Base Structure](#appendix-knowledge-base-structure)
 - [License](#license)
 
 ## Getting Started
@@ -65,6 +67,62 @@ way a person would browse a wiki, until it has enough information to answer.
 ```bash
 npm install
 ```
+
+Set your [OpenRouter](https://openrouter.ai/) API key (see
+[Configuration](#configuration) below), then try one of the two bundled
+examples — the fastest way to see the agent in action against a real
+knowledge base.
+
+## Examples
+
+[src/examples/](src/examples/) contains two self-contained scripts, each
+pointed at a different bundled knowledge base with a question tailored to
+it. They're the recommended starting point — more so than the generic
+[src/app.ts](src/app.ts) described under [Running](#running) — since each
+one demonstrates the agent grounded in a specific, coherent knowledge base.
+
+### 1. Facility management
+
+[src/examples/facility_management.ts](src/examples/facility_management.ts)
+points the agent at
+[data/knowledge_bases/facility_management](data/knowledge_bases/facility_management),
+which covers lease agreements, tenants, maintenance contracts, equipment
+manuals, and office blueprints across a portfolio of buildings, and asks:
+
+> I want to lease a floor in one of your buildings, what are the available
+> options and what are the prices?
+
+Run it with `tsx`:
+
+```bash
+npx tsx src/examples/facility_management.ts
+```
+
+Or launch **Example: Facility Management** from the VS Code Run and Debug
+panel (see [.vscode/launch.json](.vscode/launch.json)).
+
+### 2. Geographics
+
+[src/examples/geographics.ts](src/examples/geographics.ts) points the agent
+at [data/knowledge_bases/geographics](data/knowledge_bases/geographics),
+which covers capitals, population, and neighbouring countries for 44
+European countries, and asks:
+
+> What is the capital of Germany and what are the capitals of the neighbor
+> countries?
+
+Run it with `tsx`:
+
+```bash
+npx tsx src/examples/geographics.ts
+```
+
+Or launch **Example: Geographics** from the VS Code Run and Debug panel.
+
+Both scripts set the `KNOWLEDGE_DATABASES` environment variable in-process
+before calling the agent, so they work out of the box without any
+additional configuration — see [Configuration](#configuration) for how that
+variable is resolved.
 
 ## Configuration
 
@@ -113,20 +171,29 @@ bash:
 export KNOWLEDGE_DATABASES="/path/to/knowledge_bases"
 ```
 
-Bundled knowledge base:
+Bundled knowledge bases (see [Examples](#examples) for how to try each one):
 
-- **`european-countries`** — capitals, population, and neighbouring
-  countries for 44 European countries, organized by sub-region
+- **`geographics/european-countries`** — capitals, population, and
+  neighbouring countries for 44 European countries, organized by sub-region
   (western/northern/southern/southeastern/eastern Europe).
+- **`facility_management/*`** — four knowledge bases covering a portfolio of
+  office buildings: `lease-agreements`, `maintenance-contracts`,
+  `equipment-manuals`, and `office-blueprints`.
 
 ## Running
+
+For a guided first run, use the two [examples](#examples) instead — each
+pairs a specific knowledge base with a matching question.
 
 ```bash
 npm run start
 ```
 
-This runs [src/app.ts](src/app.ts) with `tsx`, which asks the agent a sample
-question and prints the answer to the console.
+This runs [src/app.ts](src/app.ts) with `tsx`, the generic entry point that
+asks the agent a sample question against the default knowledge base
+(`KNOWLEDGE_DATABASES`, see [Configuration](#configuration)) and prints the
+answer to the console. A **Debug app.ts** launch config is also available in
+[.vscode/launch.json](.vscode/launch.json).
 
 ## Building
 
@@ -244,6 +311,70 @@ config/                     OpenTelemetry Collector, Prometheus, Tempo, and Graf
 In short: the app asks a question, hands the LLM a map of the available
 knowledge bases, and lets the LLM decide which documents to open — via tool
 calls — until it has enough information to answer.
+
+## Appendix: Knowledge Base Structure
+
+Every knowledge base under [data/knowledge_bases/](data/knowledge_bases/) follows the same
+shape: a root folder with an `index.md` entry point, topic subfolders (each with its own
+`index.md`), and leaf documents — Markdown files with YAML frontmatter — that link to each
+other the way wiki pages do. The agent starts at the top-level index and follows these links,
+one `read_knowledge_base_document` tool call at a time, until it has what it needs. The two
+bundled examples below show this shape in practice.
+
+### Geographics (`european-countries`)
+
+A single knowledge base with one root [index.md](data/knowledge_bases/geographics/european-countries/index.md)
+describing its 44-country scope. A [countries/](data/knowledge_bases/geographics/european-countries/countries/index.md)
+folder groups country documents by subregion via its own index; each country document (e.g.
+[germany.md](data/knowledge_bases/geographics/european-countries/countries/western-europe/germany.md))
+states its capital and population and links out to its land-neighbours in other subregion
+folders — the cross-links a person would click through on a wiki. A separate
+[references/](data/knowledge_bases/geographics/european-countries/references/sources.md) folder
+holds shared methodology notes, linked from the root index.
+
+```mermaid
+graph TD
+    IDX["european-countries/<br/>index.md<br/>(scope, ~44 countries)"] --> CIDX["countries/index.md<br/>(grouped by subregion)"]
+    IDX --> SRC["references/sources.md<br/>(methodology &amp; caveats)"]
+
+    CIDX --> DE["western-europe/germany.md"]
+    CIDX --> FR["western-europe/france.md"]
+    CIDX --> DK["northern-europe/denmark.md"]
+    CIDX --> PL["eastern-europe/poland.md"]
+
+    DE -. neighbour .-> FR
+    DE -. neighbour .-> DK
+    DE -. neighbour .-> PL
+    FR -. neighbour .-> DE
+```
+
+### Facility management (`facility_management/*`)
+
+`facility_management` is actually four sibling knowledge bases — `lease-agreements`,
+`maintenance-contracts`, `equipment-manuals`, `office-blueprints` — each self-contained: by
+design they don't cross-link to one another, even where the same floors or equipment appear in
+more than one. The diagram below shows the internal shape of one of them,
+[lease-agreements](data/knowledge_bases/facility_management/lease-agreements/index.md): its root
+index links to three category indexes (`leases/`, `tenants/`, `reference/`); each lease document
+then cross-links to its tenant and to shared reference documents such as the landlord and rent
+schedule. The other three knowledge bases follow the same pattern, just with different
+categories.
+
+```mermaid
+graph TD
+    IDX["lease-agreements/<br/>index.md"] --> LIDX["leases/index.md"]
+    IDX --> TIDX["tenants/index.md"]
+    IDX --> RIDX["reference/index.md"]
+
+    LIDX --> F5["leases/floor5-solenne-analytics.md"]
+    LIDX --> F6["leases/floor6-brightfield-legal.md"]
+
+    F5 -. tenant .-> T1["tenants/solenne-analytics.md"]
+    F5 -. landlord .-> LL["reference/landlord.md"]
+    F5 -. service charge .-> SC["reference/service-charge.md"]
+    F6 -. tenant .-> T2["tenants/brightfield-legal-partners.md"]
+    F6 -. landlord .-> LL
+```
 
 ## License
 
