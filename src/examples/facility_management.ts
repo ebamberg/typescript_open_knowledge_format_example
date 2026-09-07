@@ -14,8 +14,12 @@ async function main() {
 
   const agent= withTrace("management_agent", management_agent);
   const answer = await agent("I want to lease a floor in one of your buildings, what are the available options and what are the prices?");
-  log.success("App", "answer:");
-  log.json(answer);
+  log.success("App", "answer to the question 'I want to lease a floor in one of your buildings, what are the available options and what are the prices?':");
+  
+
+  const answer2 = await agent("which office rooms are nearest to a conference room on the 3rd floor?");
+  log.success("App", "answer to the question 'which office rooms are nearest to a conference room on the 3rd floor?':");
+
 }
 
 main()
