@@ -3,7 +3,10 @@
 import { management_agent } from './agents';
 import { initOpenTelemetry, withTrace } from './observability/otel';
 import { log } from './logger';
+import { log } from './logger';
 
+
+async function main() {
 
 async function main() {
 
