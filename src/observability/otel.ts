@@ -8,6 +8,7 @@ import { ChatResult } from '@openrouter/sdk/models';
 import { MeterProvider, PeriodicExportingMetricReader, AggregationType } from '@opentelemetry/sdk-metrics';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { ChatCompletionFn, NonStreamingChatCompletionRequest } from '../harness/types.js';
+import { log } from '../logger.js';
 
 // Bucket boundaries tuned for LLM traffic (default OTel buckets are tuned for web request
 // latencies in ms, not multi-second LLM calls or fractional-cent costs) so that
@@ -24,8 +25,8 @@ export let root_meter: Meter;
 const shutdown = () => {
   if (openTelemetryClient) {
     openTelemetryClient.shutdown()
-        .then(() => console.log('opentelemetry shut down. Traces flushed.'))
-        .catch((error) => console.error('Error shutting down opentelemetry', error))
+        .then(() => log.success('OTel', 'shutdown complete — traces flushed.'))
+        .catch((error) => log.error('OTel', 'shutdown failed:', error))
         .finally(() => process.exit(0));
   }
 };
@@ -89,7 +90,7 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
 
     try {
         openTelemetryClient.start();
-        console.log('OpenTelemetry initialized successfully.');
+        log.success('OTel', `initialized (service=${appName} v${appVersion})`);
         // shutting own on exit
         process.on('SIGTERM', shutdown);
         process.on('SIGINT', shutdown);
@@ -97,7 +98,7 @@ export function initOpenTelemetry(appName: string, appVersion: string) {
         root_tracer = trace.getTracer(appName, appVersion);
         root_meter = metrics.getMeter(appName, appVersion);
     } catch (error) {
-        console.error('Failed to initialize OpenTelemetry', error);
+        log.error('OTel', 'initialization failed:', error);
         throw error;
     }
 }
