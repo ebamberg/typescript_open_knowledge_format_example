@@ -9,11 +9,11 @@ import { ToolDefinition } from './tools/tools';
 import { withTrace, withTraceRequest } from './observability/otel';
 import { withRetryOnError } from './harness/harness';
 import { log } from './logger';
+import { trace } from '@opentelemetry/api';
 
-// const model = "openai/gpt-4o-mini"; // doesn't follows rules in the okf files+system prompt.
-// const model = "google/gemini-3-flash-preview"; // good but structured output fails often
+//const model = "openai/gpt-4o-mini"; 
 const model = "google/gemini-3.5-flash"
-// const model = "qwen/qwen3.8-27b"; // doesn't work at all
+// const model = "qwen/qwen3.8-27b"; 
 const TEMPERATURE = 0.1;
 const MAX_TURNS=20;
 
@@ -138,6 +138,10 @@ function execute_tool_call(available_tools: Array<ToolDefinition>, tool: ChatToo
     if (tool.type == "function") {
         const tool_def = available_tools.find(t => tool.function.name == t.name);
         if (tool_def) {
+            const activeSpan = trace.getActiveSpan();
+            if (activeSpan) {
+                activeSpan.setAttribute("tool.function.arguments", tool.function.arguments);
+            }
             const args = JSON.parse(tool.function.arguments);
             log.step("Tool", `executing "${tool.function.name}" with args: ${JSON.stringify(args)}`);
             const result = tool_def.callback({ ...args });

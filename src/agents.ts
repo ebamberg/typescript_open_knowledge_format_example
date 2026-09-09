@@ -7,7 +7,7 @@ import {read_okf_tool} from './tools/okf_tools'
 import { listKnowledgeBases, read_knowledge, KnowledgeBase } from './knowledgebases/okf';
 import { withTrace } from './observability/otel';
 
-const systemPrompt = readFileSync('src/prompts/system_prompt.md', 'utf8');
+const systemPrompt = readFileSync('src/prompts/knowledgebase_reader/system_prompt_v2.md', 'utf8');
 // const userprompt =  readFileSync('src/prompts/user_prompt.md', 'utf8');
 
 let knowledgeBases: KnowledgeBase[] | undefined;
